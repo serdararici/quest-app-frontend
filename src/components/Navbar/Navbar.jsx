@@ -1,0 +1,20 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+function Navbar() {
+    let userId = 5;
+    return (
+        <div className="navbar">
+            <ul>
+                <li>
+                    <Link to="/">Home</Link>
+                </li>
+                <li>
+                    <Link to={{pathname : '/users/' + userId}}>Users</Link>
+                </li>
+            </ul>
+        </div>
+    );
+}
+
+export default Navbar;
