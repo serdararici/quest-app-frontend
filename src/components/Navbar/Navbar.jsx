@@ -10,7 +10,7 @@ function Navbar() {
                     <Link to="/">Home</Link>
                 </li>
                 <li>
-                    <Link to={{pathname : '/users/' + userId}}>Users</Link>
+                    <Link to={{pathname : '/users/' + userId}}>User</Link>
                 </li>
             </ul>
         </div>
