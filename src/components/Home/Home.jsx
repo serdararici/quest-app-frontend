@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import './Home.scss';
 import Navbar from '../Navbar/Navbar';      
-import { Link } from "react-router-dom";
 import Post from "../Post/Post";
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
 
 function Home() {
-
     const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [postList, setPostList] = useState([]);
@@ -15,40 +15,38 @@ function Home() {
         .then(res => res.json())
         .then(
             (result) => {
-            setIsLoaded(true);
-            setPostList(result);
+                setIsLoaded(true);
+                setPostList(result);
             },
             (error) => {
-            setIsLoaded(true);
-            setError(error);
+                setIsLoaded(true);
+                setError(error);
             }
         )
     }, []);
 
-    if(error) {
+    if (error) {
         return <div>Error: {error.message}</div>;
-    } else if(!isLoaded) {
+    } else if (!isLoaded) {
         return <div>Loading...</div>;
     } else {
         return (
-
             <div className="home">
                 <h1>Welcome to Home Page</h1>
-
                 <h2>Posts</h2>
 
-                <div className="container">
-                    <div>
+                <React.Fragment>
+                    <CssBaseline />
+                    <Container fixed className="container">
                         {postList.map(post => (
-                            <Post title={post.title} text={post.text} key={post.id}></Post>
-                            
+                            <Post title={post.title} text={post.text} key={post.id} />
                         ))}
-                    </div>
-                        
-                </div>
+                    </Container>
+                </React.Fragment>
             </div>
         );
     }
 }
 
 export default Home;
+// Note: The Home component fetches posts from the backend and displays them using the Post component.

@@ -25,9 +25,14 @@ function Navbar() {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        News
+                        <Link to="/" style={{ color: 'inherit', textDecoration: 'none', textAlign: 'left'
+                         }}>
+                            Home
+                        </Link>
                     </Typography>
-                    <Button color="inherit">Login</Button>
+                        <Link to={`/users/${userId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            User
+                        </Link>
                 </Toolbar>
             </AppBar>
         </Box>
