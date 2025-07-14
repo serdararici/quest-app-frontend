@@ -36,11 +36,12 @@ function Home() {
                 <h1>Welcome to Home Page</h1>
 
                 <h2>Posts</h2>
-                
+
                 <div className="container">
                     <div>
                         {postList.map(post => (
                             <Post title={post.title} text={post.text} key={post.id}></Post>
+                            
                         ))}
                     </div>
                         
