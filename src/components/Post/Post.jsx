@@ -9,19 +9,26 @@ import {
   IconButton,
   Typography
 } from '@mui/material';
-import { red } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
+import { Link } from 'react-router-dom';
+import "./Post.scss";
 
-function Post({ title, text }) {
+function Post({ title, text, userName, userId }) {
   const [expanded, setExpanded] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+
+  const handleLike = () => {
+    setLiked(!liked);
+  }
 
   return (
     <div className="postContainer">
@@ -41,9 +48,11 @@ function Post({ title, text }) {
                 padding: "16px 24px",
             }}
           avatar={
-            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-              R
+            <Link to={`/users/${userId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+               <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
+              {userName ? userName.charAt(0).toUpperCase() : "?"}
             </Avatar>
+            </Link>
           }
           action={
             <IconButton aria-label="settings">
@@ -70,8 +79,10 @@ function Post({ title, text }) {
         </CardContent>
 
         <CardActions disableSpacing>
-          <IconButton aria-label="add to favorites">
-            <FavoriteIcon />
+          <IconButton 
+          onClick={handleLike}
+          aria-label="add to favorites">
+            <FavoriteIcon style={{ color: liked ? "red" : null }}/>
           </IconButton>
           <IconButton aria-label="share">
             <ShareIcon />
@@ -86,7 +97,7 @@ function Post({ title, text }) {
               //transition: "transform 0.3s"
             }}
           >
-            <CommentIcon />
+            <CommentIcon  style={{ color: expanded ? "blue" : null }}/>
           </IconButton>
         </CardActions>
         <Collapse in={expanded} timeout="auto" unmountOnExit>

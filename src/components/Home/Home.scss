@@ -8,10 +8,12 @@
 }
 
 .container {
+  width: 100%;
+  min-height: 100vh;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
     align-items: center;
-    background-color:rgb(148, 175, 216);
+    background-color:#f0f5ff;
     padding: 10px;
 }

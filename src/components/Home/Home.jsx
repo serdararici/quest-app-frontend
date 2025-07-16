@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Home.scss';
 import Navbar from '../Navbar/Navbar';      
 import Post from "../Post/Post";
+import PostForm from "../Post/PostForm";
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -32,17 +33,13 @@ function Home() {
     } else {
         return (
             <div className="home">
-                <h1>Welcome to Home Page</h1>
-                <h2>Posts</h2>
 
-                <React.Fragment>
-                    <CssBaseline />
-                    <Container fixed className="container">
-                        {postList.map(post => (
-                            <Post title={post.title} text={post.text} key={post.id} />
-                        ))}
-                    </Container>
-                </React.Fragment>
+                <div className="container">
+                    <PostForm userId= {1} userName={"fddfd"} title={"title"} text={"text"}/>
+                    {postList.map(post => (
+                        <Post userId={post.userId} userName={post.userName} title={post.title} text={post.text} key={post.id} />
+                    ))}
+                </div>
             </div>
         );
     }
