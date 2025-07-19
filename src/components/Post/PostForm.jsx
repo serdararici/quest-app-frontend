@@ -17,12 +17,15 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { Link } from 'react-router-dom';
 import "./Post.scss";
 
-function PostForm({userName, userId }) {
+function PostForm({userName, userId, refreshPosts }) {
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
+    const [isSent, setIsSent] = useState(false);
 
   const savePost = () => {
     fetch("/posts", {
@@ -42,18 +45,46 @@ function PostForm({userName, userId }) {
 
   const handleSubmit = () => {
     savePost();
+    setIsSent(true);
+    setTitle("");
+    setText("");
+    refreshPosts();
   }
 
   const handleTitle = (value) => {
     setTitle(value);
+    setIsSent(false);
   }
 
   const handleText = (value) => {
     setText(value);
+    setIsSent(false);
   }
 
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setIsSent(false);
+  };
+
+
   return (
+    
     <div className="postContainer">
+
+      <Snackbar open={isSent} autoHideDuration={6000} onClose={handleClose}>
+        <Alert
+          onClose={handleClose}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Your post is sent!
+        </Alert>
+      </Snackbar>
+
       <Card
         sx={{
             width: { xs: "90vw", sm: "500px", md: "700px", lg: "800px" },
@@ -86,6 +117,7 @@ function PostForm({userName, userId }) {
             multiline
             inputProps = {{maxLength : 25}}
             fullWidth
+            value={title}
             placeholder="Title"
             sx={{ fontSize: "24px", fontWeight: "bold" }}
             onChange={(i) => handleTitle(i.target.value)}
@@ -105,6 +137,7 @@ function PostForm({userName, userId }) {
             multiline
             inputProps = {{maxLength : 250}}
             fullWidth
+            value={text}
             placeholder="Text"
             onChange={(i) => handleText(i.target.value)}
             endAdornment={
