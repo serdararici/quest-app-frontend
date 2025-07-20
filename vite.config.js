@@ -20,6 +20,10 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
+      '/likes': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     }
   }
 })

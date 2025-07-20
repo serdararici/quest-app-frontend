@@ -22,18 +22,21 @@ import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
 
 
-function Post({ title, text, userName, userId, postId }) {
+function Post({ title, text, userName, userId, postId, likes }) {
   const [expanded, setExpanded] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [commentList, setCommentList] = useState([]);
   const isInitialMount = useRef(true);
   const [refresh, setRefresh] = useState(false);
+  const [likeCount, setLikeCount] = useState(likes.length);
+  const [likeId, setLikeId] = useState(null);
 
    const setCommentRefresh = () => {
      setRefresh(true);
    }
+
    
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -42,7 +45,14 @@ function Post({ title, text, userName, userId, postId }) {
   };
 
   const handleLike = () => {
-    setLiked(!liked);
+    setIsLiked(!isLiked);
+    if(!isLiked) {
+      saveLike();
+      setLikeCount(likeCount + 1);
+    } else {
+      deleteLike();
+      setLikeCount(likeCount - 1);
+    }
   }
 
   const refreshComments = () => { 
@@ -62,6 +72,37 @@ function Post({ title, text, userName, userId, postId }) {
         setRefresh(false);
     }
 
+    const saveLike = () => {
+     fetch("/likes", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            postId: postId,
+            userId: userId
+        }),
+     })
+     .then((res) => res.json())
+     .catch((err) => console.log("error", err))
+    }
+
+    const deleteLike = () => {
+      fetch("/likes/" + likeId, {
+        method: "DELETE",
+      })
+      .catch((err) => console.log("error", err))
+    }
+
+
+    const checkLikes = () => {
+      var likeContrtol = likes.find(like => like.userId === userId);
+      if(likeContrtol != null) {
+        setLikeId(likeContrtol.id);
+      }
+      setIsLiked(likeContrtol ? true : false);
+    }
+
   useEffect(() => {
     if(isInitialMount.current) {
       isInitialMount.current = false;
@@ -70,6 +111,9 @@ function Post({ title, text, userName, userId, postId }) {
       refreshComments();
     }
   }, [expanded, postId]);
+
+  useEffect(() => { checkLikes(); }, []);
+
 
   return (
     <div className="postContainer">
@@ -123,7 +167,9 @@ function Post({ title, text, userName, userId, postId }) {
           <IconButton 
           onClick={handleLike}
           aria-label="add to favorites">
-            <FavoriteIcon style={{ color: liked ? "red" : null }}/>
+            <FavoriteIcon style={{ color: isLiked ? "red" : null }}>
+            </FavoriteIcon>
+            <Typography sx={{ marginLeft: 1 }}>{likeCount}</Typography>
           </IconButton>
           <IconButton aria-label="share">
             <ShareIcon />
@@ -168,6 +214,5 @@ function Post({ title, text, userName, userId, postId }) {
     </div>
   );
 }
-
 export default Post;
-// Note: The Post component is designed to display a post with a title and text.
+// Note: The Post component is designed to display a post with a title and text
