@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './components/Home/Home'
 import User from './components/User/User'
 import Navbar from './components/Navbar/Navbar'
+import Auth from './components/Auth/Auth'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/users/:userId" element={<User />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </BrowserRouter>
   )
