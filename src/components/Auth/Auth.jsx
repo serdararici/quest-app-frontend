@@ -1,94 +1,114 @@
-import { Button, FormControl, Input, InputLabel, Box, Container, FormHelperText } from "@mui/material";
+import {
+  Button,
+  FormControl,
+  Input,
+  InputLabel,
+  Box,
+  Container,
+  FormHelperText,
+} from "@mui/material";
 import React from "react";
-
-
-
+import { useNavigate } from "react-router-dom";
 
 function Auth() {
-
-  const {userName, setUserName} = React.useState("");
-  const {password, setPassword} = React.useState("");
+  const [userName, setUserName] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const navigate = useNavigate();
 
   const handleUserName = (value) => {
     setUserName(value);
   };
+
   const handlePassword = (value) => {
     setPassword(value);
-  }
+  };
 
   const sendRequest = (path) => {
-    fetch("/auth/" +path, {
+    fetch("/api/auth/" + path, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-          userName: userName,
-          password: password,
-        }),
+        userName: userName,
+        password: password,
+      }),
     })
-    .then(res => res.json())
-    .then((result) = result)
-    .catch(err => {
-      console.error("Error:", err);
-    });
-  }
+      .then((res) => res.json())
+      .then((result) => {
+        localStorage.setItem("tokenKey", result.message);
+        localStorage.setItem("currentUser", result.userId);
+        localStorage.setItem("userName", userName);
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+      });
+  };
 
-  const handleRegister = () => {
-      sendRequest("register")
-      setUserName("");
-      setPassword("");
-  }
-  const handleLogin = () => {
-      sendRequest("login")
-      setUserName("");
-      setPassword("");
-  }
+  const handleButton = (path) => {
+    sendRequest(path);
+    setUserName("");
+    setPassword("");
+    navigate("/auth");
+  };
+
 
   return (
-    <Container maxWidth="sm" sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Box
-          sx={{
-            width: "100%",
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            alignItems: 'center',
-            padding: 4,
-            backgroundColor: '#f5f5f5',
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          alignItems: "center",
+          padding: 4,
+          backgroundColor: "#f5f5f5",
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
         <FormControl fullWidth variant="standard">
           <InputLabel>UserName</InputLabel>
-          <Input  onChange={(i) => handleUserName(i.target.value)}/>
+          <Input onChange={(i) => handleUserName(i.target.value)} />
         </FormControl>
 
         <FormControl fullWidth variant="standard">
           <InputLabel>Password</InputLabel>
-          <Input type="password"
-          onChange={(i) => handlePassword(i.target.value)}/>
+          <Input
+            type="password"
+            onChange={(i) => handlePassword(i.target.value)}
+          />
         </FormControl>
 
         <Button
           variant="contained"
-          style={{
-            background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-            color: "#fff"
+          sx={{
+            background:
+              "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+            color: "#fff",
           }}
-          onClick={handleRegister()}
+          onClick={() => handleButton("register")}
         >
           Register
         </Button>
-        <FormHelperText >Are you already registered?</FormHelperText>
+        <FormHelperText>Are you already registered?</FormHelperText>
         <Button
           variant="contained"
-          style={{
-            background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+          sx={{
+            background:
+              "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
             color: "#fff",
           }}
-          onClick={handleLogin()}
+          onClick={() => handleButton("login")}
         >
           Login
         </Button>
@@ -98,6 +118,7 @@ function Auth() {
 }
 
 export default Auth;
+
 
 
 
