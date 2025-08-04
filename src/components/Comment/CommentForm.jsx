@@ -15,6 +15,7 @@ function CommentForm({ userId, userName, postId }) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "authorization": localStorage.getItem("tokenKey"),
         },
         body: JSON.stringify({
             postId: postId,

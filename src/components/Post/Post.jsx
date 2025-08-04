@@ -32,6 +32,7 @@ function Post({ title, text, userName, userId, postId, likes }) {
   const [refresh, setRefresh] = useState(false);
   const [likeCount, setLikeCount] = useState(likes.length);
   const [likeId, setLikeId] = useState(null);
+  let disabled = localStorage.getItem("currentUser") == null ? true : false;
 
    const setCommentRefresh = () => {
      setRefresh(true);
@@ -77,10 +78,11 @@ function Post({ title, text, userName, userId, postId, likes }) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "authorization": localStorage.getItem("tokenKey"),
         },
         body: JSON.stringify({
             postId: postId,
-            userId: userId
+            userId: localStorage.getItem("currentUser"),
         }),
      })
      .then((res) => res.json())
@@ -90,13 +92,16 @@ function Post({ title, text, userName, userId, postId, likes }) {
     const deleteLike = () => {
       fetch("/likes/" + likeId, {
         method: "DELETE",
+        headers: {
+            "authorization": localStorage.getItem("tokenKey"),
+        },
       })
       .catch((err) => console.log("error", err))
     }
 
 
     const checkLikes = () => {
-      var likeContrtol = likes.find(like => like.userId === userId);
+      var likeContrtol = likes.find(like => "" + like.userId === localStorage.getItem("currentUser"));
       if(likeContrtol != null) {
         setLikeId(likeContrtol.id);
       }
@@ -164,13 +169,22 @@ function Post({ title, text, userName, userId, postId, likes }) {
         </CardContent>
 
         <CardActions disableSpacing>
+          {disabled ? 
+          <IconButton 
+          disabled
+          onClick={handleLike}
+          aria-label="add to favorites">
+            <FavoriteIcon style={{ color: isLiked ? "red" : null }}>
+            </FavoriteIcon>
+          </IconButton> : 
           <IconButton 
           onClick={handleLike}
           aria-label="add to favorites">
             <FavoriteIcon style={{ color: isLiked ? "red" : null }}>
             </FavoriteIcon>
-            <Typography sx={{ marginLeft: 1 }}>{likeCount}</Typography>
-          </IconButton>
+          </IconButton>}
+
+          <Typography sx={{ marginLeft: 1 }}>{likeCount}</Typography>
           <IconButton aria-label="share">
             <ShareIcon />
           </IconButton>
@@ -203,11 +217,12 @@ function Post({ title, text, userName, userId, postId, likes }) {
               ></Comment>
             )) : "Loading..."}
 
+          {disabled ? "" :
             <CommentForm 
                 userId={1} 
                 userName={"user"} 
                 postId= {postId}>
-            </CommentForm>
+            </CommentForm>}
           </Container>
         </Collapse>
       </Card>

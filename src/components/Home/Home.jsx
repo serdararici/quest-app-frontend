@@ -39,7 +39,8 @@ function Home() {
             <div className="home">
 
                 <div className="container">
-                    <PostForm userId= {1} userName={"fddfd"} refreshPosts = {refreshPosts}/>
+                    {localStorage.getItem("currentUser") == null ? "" :  
+                        <PostForm userId= {localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} refreshPosts = {refreshPosts}/>}
                     {postList.map(post => (
                         <Post likes={post.postLikes} postId={post.id} userId={post.userId} userName={post.userName} title={post.title} text={post.text} key={post.id}/>
                     ))}

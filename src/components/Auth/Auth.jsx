@@ -23,33 +23,44 @@ function Auth() {
     setPassword(value);
   };
 
-  const sendRequest = (path) => {
-    fetch("/api/auth/" + path, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userName: userName,
-        password: password,
-      }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        localStorage.setItem("tokenKey", result.message);
-        localStorage.setItem("currentUser", result.userId);
-        localStorage.setItem("userName", userName);
-      })
-      .catch((err) => {
-        console.error("Error:", err);
+  const sendRequest = async (path) => {
+    try {
+      const res = await fetch("/api/auth/" + path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userName: userName,
+          password: password,
+        }),
       });
+
+      if (!res.ok) {
+        console.error("HTTP Error", res.status);
+        return;
+      }
+
+      const result = await res.json();
+      localStorage.setItem("tokenKey", result.message);
+      localStorage.setItem("currentUser", result.userId);
+      localStorage.setItem("userName", userName);
+
+      if (path === "login") {
+        navigate("/");
+      } else {
+        navigate("/auth");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
+
 
   const handleButton = (path) => {
     sendRequest(path);
     setUserName("");
     setPassword("");
-    navigate("/auth");
   };
 
 
@@ -118,77 +129,3 @@ function Auth() {
 }
 
 export default Auth;
-
-
-
-
-
-/*
-import { Button, FormControl, Input, InputLabel } from "@mui/material";
-import React from "react";
-
-function Auth() {
-  return (
-    <FormControl sx={{ m: 1, width: '25ch' }} variant="standard"
-      style={{ display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        backgroundColor: "#f0f0f0",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
-        }}>
-        <InputLabel>UserName</InputLabel>
-        <Input></Input>
-        <InputLabel style={{top: 80}}>Password</InputLabel>
-        <Input style={{top:40}} type="password"></Input>
-        <Button variant="contained" 
-            color="white" 
-            style={{ marginTop: 60, backgroundColor: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)" }}>
-            Register
-        </Button>
-    </FormControl>
-
-  );
-}
-
-export default Auth;
-*/
-
-
-
-/*
-import { Button, FormControl, Input, InputLabel } from "@mui/material";
-import React from "react";
-
-function Auth() {
-  return (
-    <FormControl sx={{ m: 1, width: '25ch' }} variant="standard"
-      style={{ display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        backgroundColor: "#f0f0f0",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
-        }}>
-        <InputLabel>UserName</InputLabel>
-        <Input></Input>
-        <InputLabel style={{top: 80}}>Password</InputLabel>
-        <Input style={{top:40}} type="password"></Input>
-        <Button variant="contained" 
-            color="white" 
-            style={{ marginTop: 60, backgroundColor: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)" }}>
-            Register
-        </Button>
-    </FormControl>
-
-  );
-}
-
-export default Auth;
-*/

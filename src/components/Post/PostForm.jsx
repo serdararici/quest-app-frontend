@@ -30,8 +30,9 @@ function PostForm({userName, userId, refreshPosts }) {
   const savePost = () => {
     fetch("/posts", {
         method: "POST",
-        headers: {
+       headers: {
             "Content-Type": "application/json",
+            "authorization": localStorage.getItem("tokenKey"),
         },
         body: JSON.stringify({
             title: title,
