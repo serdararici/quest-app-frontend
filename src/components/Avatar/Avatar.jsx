@@ -20,9 +20,10 @@ const style = {
 }
 
 
-function Avatar() {
+function Avatar(props) {
+    const { avatarId } = props;
     const [open, setOpen] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState(0);
+    const [selectedValue, setSelectedValue] = React.useState(avatarId);
 
     const handleChange = (event) => {
         setSelectedValue(event.target.value);  

@@ -1,0 +1,20 @@
+.root {
+  width: 100%;
+}
+
+.container {
+  max-height: 440px;
+  overflow-y: auto;
+  min-width: 100px;
+
+  margin-top: 10px;
+}
+
+.appBar {
+  position: relative;
+}
+
+.title {
+  margin-left: 2px;
+  flex: 1;
+}

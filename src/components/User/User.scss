@@ -1,9 +1,15 @@
 .user {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;      
-    justify-content: flex-start;
-    padding-top: 20px;      
-    box-sizing: border-box;
-  }
+  display: flex;
+  flex-direction: row; 
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px;
+  gap: 40px;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+.user .activity-container {
+  flex: 1;
+  
+}
