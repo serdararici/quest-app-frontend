@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,6 +15,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
+import Slide from '@mui/material/Slide';
 import Post from "../Post/Post";
 
 const columns = [
@@ -30,24 +31,31 @@ const columns = [
 function PopUp(props) {
     const {isOpen, postId, setIsOpen} = props;
     const [open, setOpen] = useState(isOpen); 
-    const [post, setPost] = useState();
+    const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const getPost = () => {
         if (!postId) return;
         
-        setLoading(true)
+        setLoading(true);
+        const token = localStorage.getItem("tokenKey");
+        
         fetch("/posts/" + postId, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("tokenKey"),
+                "Authorization": token,
             }
         })
-        .then((res) => res.json())
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error("HTTP error! status: " + res.status);
+            }
+            return res.json();
+        })
         .then(
             (result) => {
-                console.log(result);
+                console.log("PopUp: Post data received:", result);
                 setPost(result);
                 setLoading(false);
             },
@@ -58,7 +66,6 @@ function PopUp(props) {
         );
     }
 
-
     const handleClose = () => {
       setOpen(false);
       setIsOpen(false);
@@ -66,116 +73,126 @@ function PopUp(props) {
 
     useEffect(() => {
         setOpen(isOpen);
-      }, [isOpen]);
+    }, [isOpen]);
 
     useEffect(() => {
         if (postId && isOpen) {
+            console.log("PopUp: Fetching post for postId:", postId);
             getPost();
         }
     }, [postId, isOpen]);
 
     return (
         <Dialog
-        fullScreen
-        open={open}
-        onClose={handleClose}
-        slots={{
-          transition: Transition,
-        }}
-      >
-        <AppBar sx={{ position: 'relative' }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleClose}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-              Close
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        {loading ? (
+            fullScreen
+            open={open}
+            onClose={handleClose}
+        >
+            <AppBar sx={{ position: 'relative' }}>
+                <Toolbar>
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={handleClose}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                        Post Details
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            {loading ? (
                 <div style={{ padding: '20px', textAlign: 'center' }}>
-                    Loading...
+                    Loading post...
                 </div>
+            ) : post ? (
+                <Post 
+                    title={post.title}
+                    text={post.text}
+                    userName={post.userName}
+                    userId={post.userId}
+                    postId={post.id}
+                    likes={post.postLikes || []}
+                />
             ) : (
-                <Post likes = {post.postLikes} postId = {post.id} userId = {post.userId} userName = {post.userName}  
-                    title={post.title} text={post.text}></Post>
+                <div style={{ padding: '20px', textAlign: 'center' }}>
+                    Post not found
+                </div>
             )}
-      </Dialog>
+        </Dialog>
     );
 }
 
 function UserActivity(props) {
-  const [error, setError] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [rows, setRows] = useState([]);
-  const { userId } = props;
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState();
+    const [error, setError] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [rows, setRows] = useState([]);
+    const { userId } = props;
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
 
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const getActivity = () => {
-    if (!userId) return;
-    console.log("Fetching user activity for userId:", userId);
-    const token = localStorage.getItem("tokenKey");
-    console.log("Token from localStorage:", token);
-
-    fetch("/users/activity/" + userId, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": localStorage.getItem("tokenKey"),
-        }
-    })
-      .then((res) => {
+    const getActivity = () => {
+        if (!userId) return;
+        
+        console.log("Fetching user activity for userId:", userId);
+        const token = localStorage.getItem("tokenKey");
+        console.log("Token from localStorage:", token);
+        
+        fetch("/users/activity/" + userId, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token,
+            }
+        })
+        .then((res) => {
             if (!res.ok) {
                 throw new Error("HTTP error! status: " + res.status);
             }
             return res.json();
         })
-      .then(
-        (result) => {
-            console.log("result: " + result);
-          setIsLoaded(true);
-          setRows(result);
-        },
-        (error) => {
-            console.log("error getactivity" + error);
-            setIsLoaded(true);
-            setError(error);
-        }
-      );
-  }
+        .then(
+            (result) => {
+                console.log("Activity result:", result);
+                setIsLoaded(true);
+                setRows(result);
+                setError(null);
+            },
+            (error) => {
+                console.log("Error getting activity:", error);
+                setIsLoaded(true);
+                setError(error);
+            }
+        );
+    }
 
     useEffect(() => {
         if (userId) {
-        getActivity();
+            getActivity();
         }
     }, [userId]);   
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(+event.target.value);
+        setPage(0);
+    };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
+    const handleNotification = (postId) => {
+        console.log("UserActivity: Opening post with ID:", postId);
+        setSelectedPost(postId);
+        setIsOpen(true);
+    };
 
-  const handleNotification = (postId) => {
-    setSelectedPost(postId);
-    setIsOpen(true);
-  };
-
-  if (error) {
+    if (error) {
         return (
             <Paper className="root">
                 <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
@@ -185,65 +202,65 @@ function UserActivity(props) {
         );
     }
 
-  return (
-    <div>
-    {isOpen? <PopUp isOpen={isOpen} postId={selectedPost} setIsOpen={setIsOpen}/>: ""}
-    <Paper className="root">
-      <TableContainer className="container">
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-                <TableCell colSpan={3} align="center" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-                    User Activity
-                </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {!isLoaded ? (
-                <TableRow>
-                    <TableCell colSpan={3} align="center">
-                        Loading...
-                    </TableCell>
-                </TableRow>
-            ) : rows.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={3} align="center" style={{ fontStyle: 'italic' }}>
-                        No activity found.
-                    </TableCell>
-                </TableRow>
-            ) : (
-                rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
-                    <TableRow 
-                        key={index} 
-                        hover 
-                        role="button" 
-                        tabIndex={-1}
-                        onClick={() => handleNotification(row[1])}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <TableCell align="left">
-                            {row[3] + " " + row[0] + " your post"}
-                        </TableCell>
-                    </TableRow>
-                ))
-            )}
-        </TableBody>
-        </Table>
-      </TableContainer>
-      {rows.length > 0 && (
-        <TablePagination
-            rowsPerPageOptions={[10, 25, 100]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-    )}
-    </Paper>
-    </div>
-  );
+    return (
+        <div>
+            {isOpen && <PopUp isOpen={isOpen} postId={selectedPost} setIsOpen={setIsOpen}/>}
+            <Paper className="root">
+                <TableContainer className="container">
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell colSpan={3} align="center" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                    User Activity
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {!isLoaded ? (
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center">
+                                        Loading...
+                                    </TableCell>
+                                </TableRow>
+                            ) : rows.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center" style={{ fontStyle: 'italic' }}>
+                                        No activity found.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                                    <TableRow 
+                                        key={index} 
+                                        hover 
+                                        role="button" 
+                                        tabIndex={-1}
+                                        onClick={() => handleNotification(row[1])}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        <TableCell align="left">
+                                            {row[3] + " " + row[0] + " your post"}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                {rows.length > 0 && (
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                )}
+            </Paper>
+        </div>
+    );
 }
 
 export default UserActivity;
