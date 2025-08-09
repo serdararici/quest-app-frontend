@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Home.scss';
+import styles from './Home.module.scss';
 import Navbar from '../Navbar/Navbar';      
 import Post from "../Post/Post";
 import PostForm from "../Post/PostForm";
@@ -36,9 +36,9 @@ function Home() {
         return <div>Loading...</div>;
     } else {
         return (
-            <div className="home">
+            <div className={styles.home}>
 
-                <div className="container">
+                <div className={styles.container}>
                     {localStorage.getItem("currentUser") == null ? "" :  
                         <PostForm userId= {localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} refreshPosts = {refreshPosts}/>}
                     {postList.map(post => (

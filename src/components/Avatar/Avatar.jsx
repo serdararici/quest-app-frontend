@@ -57,7 +57,7 @@ function Avatar(props) {
             />
             <CardContent>
                 <Typography gutterBottom variant="h5" component="div">
-                Username
+                {props.userName ? props.userName : "User Name"}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 User Info 

@@ -57,7 +57,14 @@ function Post({ title, text, userName, userId, postId, likes }) {
   }
 
   const refreshComments = () => { 
-        fetch("/comments?postId=" + postId)
+        fetch("/comments?postId=" + postId , {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": localStorage.getItem("tokenKey"),
+        }
+    })
+        
         .then(res => res.json())
         .then(
             (result) => {
@@ -86,6 +93,7 @@ function Post({ title, text, userName, userId, postId, likes }) {
         }),
      })
      .then((res) => res.json())
+     .then(() => refreshComments())
      .catch((err) => console.log("error", err))
     }
 
@@ -207,20 +215,28 @@ function Post({ title, text, userName, userId, postId, likes }) {
 
             }}
             fixed>
-           {error ? "eror" : 
-            isLoaded ? commentList.map(comment => (
-              <Comment 
-                key={comment.id}
-                userId={comment.userId} 
-                userName={comment.userName} 
-                text={comment.text} 
-              ></Comment>
-            )) : "Loading..."}
+           {error 
+            ? "Error loading comments." 
+            : isLoaded 
+              ? commentList.length > 0 
+                ? commentList.map(comment => (
+                    <Comment 
+                      key={comment.id}
+                      userId={comment.userId} 
+                      userName={comment.userName} 
+                      text={comment.text} 
+                    />
+                  ))
+                : <Typography sx={{ color: "gray", fontStyle: "italic" }}>
+                    No comments yet.
+                  </Typography>
+              : "Loading..."}
+
 
           {disabled ? "" :
             <CommentForm 
-                userId={1} 
-                userName={"user"} 
+                userId={localStorage.getItem("currentUser")} 
+                userName={localStorage.getItem("userName")} 
                 postId= {postId}>
             </CommentForm>}
           </Container>
