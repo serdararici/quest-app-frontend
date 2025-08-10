@@ -41,7 +41,7 @@ function User() {
         <div className="user">
             {user && (
                 <div className="avatar-container">
-                    <Avatar avatarId={user.avatarId} />
+                    <Avatar avatarId={user.avatarId} userId={userId} userName={user.userName}/>
                 </div>
             )}
 
