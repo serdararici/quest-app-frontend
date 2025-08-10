@@ -1,6 +1,5 @@
 
-
-import React from 'react';
+import React from "react";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -25,6 +24,28 @@ function Avatar(props) {
     const [open, setOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState(avatarId);
 
+
+    const saveAvatar = () => {
+        fetch(`/users/${localStorage.getItem("currentUser")}/avatar`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": localStorage.getItem("tokenKey"),
+        },
+        body: JSON.stringify({
+            avatarId: selectedValue 
+        }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Avatar updated:", data);
+        })
+        .catch(err => {
+            console.log("Error saving avatar:", err);
+        });
+
+    }
+
     const handleChange = (event) => {
         setSelectedValue(event.target.value);  
     }
@@ -35,6 +56,7 @@ function Avatar(props) {
 
     const handleClose = () => {
         setOpen(false); 
+        saveAvatar();
     }
 
     return (
