@@ -43,7 +43,6 @@ function Post({ title, text, userName, userId, postId, likes }) {
      setRefresh(true);
    }
 
-   
   const handleExpandClick = () => {
     setExpanded(!expanded);
     refreshComments();
@@ -69,20 +68,21 @@ function Post({ title, text, userName, userId, postId, likes }) {
           "Authorization": localStorage.getItem("tokenKey"),
         }
     })
-        
-        .then(res => res.json())
-        .then(
-            (result) => {
-                setIsLoaded(true);
-                setCommentList(result);
-            },
-            (error) => {
-               console.log("error", error);
-                setIsLoaded(true);
-                setError(error);
-            }
-        )
-        setRefresh(false);
+      .then(res => res.json())
+      .then(
+          (result) => {
+              setIsLoaded(true);
+              setCommentList(result);
+              setRefresh(false);
+          },
+          (error) => {
+              console.log("error", error);
+              setIsLoaded(true);
+              setError(error);
+              setRefresh(false);
+          }
+      )
+      
     }
 
     const saveLike = () => {
@@ -115,7 +115,7 @@ function Post({ title, text, userName, userId, postId, likes }) {
     else {
       refreshComments();
     }
-  }, [expanded, postId]);
+  }, [refresh]);
 
   useEffect(() => { checkLikes(); }, []);
 
@@ -229,7 +229,8 @@ function Post({ title, text, userName, userId, postId, likes }) {
             <CommentForm 
                 userId={localStorage.getItem("currentUser")} 
                 userName={localStorage.getItem("userName")} 
-                postId= {postId}>
+                postId= {postId}
+                setCommentRefresh={setCommentRefresh}>
             </CommentForm>}
           </Container>
         </Collapse>

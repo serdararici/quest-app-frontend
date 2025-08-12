@@ -28,15 +28,21 @@ function PostForm({userName, userId, refreshPosts }) {
     const [text, setText] = useState("");
     const [isSent, setIsSent] = useState(false);
 
-  const savePost = () => {
-    PostWithAuth("/posts", {
+  const savePost = async () => {
+    try {
+      const res = await PostWithAuth("/posts", {
         title: title,
         userId: userId,
-        text: text
-    })
-    .then((res) => res.json())
-    .catch((err) => console.log("error", err))
-  }
+        text: text,
+      });
+      const data = await res.json();
+      console.log(data);
+      refreshPosts();
+    } catch (err) {
+      console.log("error", err);
+    }
+  };
+
 
   const handleSubmit = () => {
     savePost();

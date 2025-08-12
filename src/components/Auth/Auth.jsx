@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import PostWithoutAuth from "../../services/HttpService";
+import { PostWithoutAuth } from "../../services/HttpService";
 
 function Auth() {
   const [userName, setUserName] = React.useState("");

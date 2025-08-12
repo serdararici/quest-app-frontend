@@ -40,9 +40,10 @@ function User() {
                 </div>
             )}
 
-            <div className="activity-container">
+            {localStorage.getItem("currentUser") === userId ?  <div className="activity-container">
                 <UserActivity userId={userId} />
-            </div>
+            </div> : ""}
+            
         </div>
     );
 }

@@ -8,23 +8,43 @@ import IconButton from "@mui/material/IconButton";
 import { PostWithAuth } from "../../services/HttpService";
 
 
-function CommentForm({ userId, userName, postId }) {
+function CommentForm({ userId, userName, postId, setCommentRefresh }) {
     const [text, setText] = useState("");
 
-    const saveComment = () => {
-    PostWithAuth("/comments", {
-        postId: postId,
-        userId: userId,
-        text: text
-    })
-    .then((res) => res.json())
-    .catch((err) => console.log("error", err))
+    const saveComment = async () => {
+    try {
+        const response = await PostWithAuth("/comments", {
+            postId: postId,
+            userId: userId,
+            text: text
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            return { success: true, data: result };
+        } else {
+            console.log("Error saving comment:", result);
+            return { success: false, error: result };
+        }
+    } catch (err) {
+        console.log("Network error:", err);
+        return { success: false, error: err };
     }
+};
 
-    const handleSubmit = () => {    
-        saveComment();
+const handleSubmit = async () => {    
+    if (!text.trim()) return; // Boş yorum gönderilmesini engelle
+    
+    const result = await saveComment();
+    
+    if (result.success) {
         setText("");
+        setCommentRefresh();
+    } else {
+        console.error("Comment did not saved", result.error);
     }
+};
 
     const handleChange = (value) => {
         setText(value);
