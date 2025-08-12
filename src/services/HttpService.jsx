@@ -67,7 +67,7 @@ export const DeleteWithAuth = (url) => {
 
 export const RefreshToken = () => {
 
-  var request = fetch("/api/auth/refresh", {
+  var request = fetch("/auth/refresh", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

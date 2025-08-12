@@ -6,32 +6,52 @@ import { blue, grey } from "@mui/material/colors";
 import Send from "@mui/icons-material/Send";
 import IconButton from "@mui/material/IconButton";
 import { PostWithAuth } from "../../services/HttpService";
+import { Refresh } from "@mui/icons-material";
 
 
 function CommentForm({ userId, userName, postId, setCommentRefresh }) {
     const [text, setText] = useState("");
 
-    const saveComment = async () => {
-    try {
-        const response = await PostWithAuth("/comments", {
-            postId: postId,
-            userId: userId,
-            text: text
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            return { success: true, data: result };
-        } else {
-            console.log("Error saving comment:", result);
-            return { success: false, error: result };
-        }
-    } catch (err) {
-        console.log("Network error:", err);
-        return { success: false, error: err };
+     const logout = () => {
+        localStorage.removeItem("tokenKey")
+        localStorage.removeItem("currentUser")
+        localStorage.removeItem("refreshKey")
+        localStorage.removeItem("userName")
+        window.location.reload(); // Sayfayı yenilemek için
     }
-};
+
+    const saveComment = () => {
+        PostWithAuth("/comments",{
+            postId: postId, 
+            userId : userId,
+            text : text,
+          })
+          .then((res) => {
+            if(!res.ok) {
+                RefreshToken()
+                .then((res) => { if(!res.ok) {
+                    logout();
+                } else {
+                   return res.json()
+                }})
+                .then((result) => {
+                    console.log(result)
+
+                    if(result != undefined){
+                        localStorage.setItem("tokenKey",result.accessToken);
+                        saveComment();
+                        setCommentRefresh();
+                    }})
+                .catch((err) => {
+                    console.log(err)
+                })
+            } else 
+            res.json()
+        })
+          .catch((err) => {
+            console.log(err)
+          })
+    }
 
 const handleSubmit = async () => {    
     if (!text.trim()) return; // Boş yorum gönderilmesini engelle
