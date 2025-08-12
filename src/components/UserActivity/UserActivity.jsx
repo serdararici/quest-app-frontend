@@ -17,6 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
 import Post from "../Post/Post";
+import { GetWithAuth } from "../../services/HttpService";
 
 const columns = [
     {
@@ -40,13 +41,7 @@ function PopUp(props) {
         setLoading(true);
         const token = localStorage.getItem("tokenKey");
         
-        fetch("/posts/" + postId, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token,
-            }
-        })
+        GetWithAuth(`/posts/${postId}`)
         .then((res) => {
             if (!res.ok) {
                 throw new Error("HTTP error! status: " + res.status);

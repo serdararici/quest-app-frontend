@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import PostWithoutAuth from "../../services/HttpService";
 
 function Auth() {
   const [userName, setUserName] = React.useState("");
@@ -25,16 +26,10 @@ function Auth() {
 
   const sendRequest = async (path) => {
     try {
-      const res = await fetch("/api/auth/" + path, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userName: userName,
-          password: password,
-        }),
-      });
+      const res = await PostWithoutAuth(("/api/auth/" + path), {
+            userName : userName, 
+            password : password,
+          });
 
       if (!res.ok) {
         console.error("HTTP Error", res.status);

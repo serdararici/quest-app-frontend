@@ -5,23 +5,17 @@ import { Link } from "react-router-dom";
 import { blue, grey } from "@mui/material/colors";
 import Send from "@mui/icons-material/Send";
 import IconButton from "@mui/material/IconButton";
+import { PostWithAuth } from "../../services/HttpService";
 
 
 function CommentForm({ userId, userName, postId }) {
     const [text, setText] = useState("");
 
     const saveComment = () => {
-    fetch("/comments", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "authorization": localStorage.getItem("tokenKey"),
-        },
-        body: JSON.stringify({
-            postId: postId,
-            userId: userId,
-            text: text
-            }),
+    PostWithAuth("/comments", {
+        postId: postId,
+        userId: userId,
+        text: text
     })
     .then((res) => res.json())
     .catch((err) => console.log("error", err))

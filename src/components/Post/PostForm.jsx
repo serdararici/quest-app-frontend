@@ -21,6 +21,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { Link } from 'react-router-dom';
 import "./Post.scss";
+import { PostWithAuth } from "../../services/HttpService";
 
 function PostForm({userName, userId, refreshPosts }) {
     const [title, setTitle] = useState("");
@@ -28,17 +29,10 @@ function PostForm({userName, userId, refreshPosts }) {
     const [isSent, setIsSent] = useState(false);
 
   const savePost = () => {
-    fetch("/posts", {
-        method: "POST",
-       headers: {
-            "Content-Type": "application/json",
-            "authorization": localStorage.getItem("tokenKey"),
-        },
-        body: JSON.stringify({
-            title: title,
-            userId: userId,
-            text: text
-            }),
+    PostWithAuth("/posts", {
+        title: title,
+        userId: userId,
+        text: text
     })
     .then((res) => res.json())
     .catch((err) => console.log("error", err))

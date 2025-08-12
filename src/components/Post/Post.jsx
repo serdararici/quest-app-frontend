@@ -20,6 +20,10 @@ import { Link } from 'react-router-dom';
 import "./Post.scss";
 import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
+import { PostWithAuth } from "../../services/HttpService";
+import { DeleteWithAuth } from "../../services/HttpService";
+import { Delete } from "@mui/icons-material";
+
 
 
 function Post({ title, text, userName, userId, postId, likes }) {
@@ -33,6 +37,7 @@ function Post({ title, text, userName, userId, postId, likes }) {
   const [likeCount, setLikeCount] = useState(likes.length);
   const [likeId, setLikeId] = useState(null);
   let disabled = localStorage.getItem("currentUser") == null ? true : false;
+
 
    const setCommentRefresh = () => {
      setRefresh(true);
@@ -81,29 +86,16 @@ function Post({ title, text, userName, userId, postId, likes }) {
     }
 
     const saveLike = () => {
-     fetch("/likes", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "authorization": localStorage.getItem("tokenKey"),
-        },
-        body: JSON.stringify({
-            postId: postId,
+      PostWithAuth(`/likes`, {
+        postId: postId,
             userId: localStorage.getItem("currentUser"),
-        }),
-     })
+      })
      .then((res) => res.json())
-     .then(() => refreshComments())
      .catch((err) => console.log("error", err))
     }
 
     const deleteLike = () => {
-      fetch("/likes/" + likeId, {
-        method: "DELETE",
-        headers: {
-            "authorization": localStorage.getItem("tokenKey"),
-        },
-      })
+      DeleteWithAuth(`/likes/${likeId}`)
       .catch((err) => console.log("error", err))
     }
 

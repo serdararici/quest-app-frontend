@@ -13,6 +13,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import Radio from '@mui/material/Radio';
 import ListItemText from '@mui/material/ListItemText';
+import { PutWithAuth } from "../../services/HttpService";
 
 const style = {
   position: 'absolute', 
@@ -24,18 +25,10 @@ function Avatar(props) {
     const [open, setOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState(avatarId);
 
-
     const saveAvatar = () => {
-        fetch(`/users/${localStorage.getItem("currentUser")}/avatar`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": localStorage.getItem("tokenKey"),
-        },
-        body: JSON.stringify({
-            avatarId: selectedValue 
-        }),
-        })
+        PutWithAuth(`/users/${localStorage.getItem("currentUser")}/avatar`), {
+            avatar: selectedValue,
+        }
         .then(res => res.json())
         .then(data => {
             console.log("Avatar updated:", data);

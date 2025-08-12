@@ -3,19 +3,14 @@ import { useParams } from "react-router-dom";
 import "./User.scss";
 import Avatar from "../Avatar/Avatar";
 import UserActivity from "../UserActivity/UserActivity";
+import { GetWithAuth } from "../../services/HttpService";
 
 function User() {
     const { userId } = useParams();
     const [user, setUser] = useState();
 
     const getUser = () => {
-        fetch("/users/" + userId, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("tokenKey"),
-            },
-        })
+        GetWithAuth(`/users/${userId}`)
         .then((res) => {
             if (!res.ok) {
                 throw new Error("HTTP error! status: " + res.status);
