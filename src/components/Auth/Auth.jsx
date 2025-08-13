@@ -53,8 +53,8 @@ function Auth() {
   };
 
 
-  const handleButton = (path) => {
-    sendRequest(path);
+  const handleButton = async (path) => {
+    await sendRequest(path);
     setUserName("");
     setPassword("");
   };

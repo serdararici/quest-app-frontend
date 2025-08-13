@@ -23,11 +23,11 @@ const style = {
 function Avatar(props) {
     const {avatarId, userId, userName} = props;
     const [open, setOpen] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState(avatarId);
+    const [selectedValue, setSelectedValue] = React.useState(avatarId || 0); // Default to avatar 1 if not provided
 
     const saveAvatar = () => {
         PutWithAuth(`/users/${localStorage.getItem("currentUser")}/avatar`), {
-            avatar: selectedValue,
+            avatar: selectedValue
         }
         .then(res => res.json())
         .then(data => {
@@ -79,7 +79,7 @@ function Avatar(props) {
                 </Typography>
             </CardContent>
             <CardActions sx={{ display: 'flex', justifyContent: 'center' }}>
-                {localStorage.getItem("currentUser") === userId ? <Button size="small" color='primary' onClick={handleOpen}>Change Avatar</Button> : ""}
+                {localStorage.getItem("currentUser") == userId ? <Button size="small" color='primary' onClick={handleOpen}>Change Avatar</Button> : ""}
                 
             </CardActions>
             </Card>
