@@ -1,3 +1,175 @@
+
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardActions,
+  Collapse,
+  Avatar,
+  IconButton,
+  Typography,
+  Container
+} from '@mui/material';
+import { blue } from '@mui/material/colors';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import ShareIcon from '@mui/icons-material/Share';
+import CommentIcon from '@mui/icons-material/Comment';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Link } from 'react-router-dom';
+import Comment from "../Comment/Comment";
+import CommentForm from "../Comment/CommentForm";
+import { PostWithAuth, DeleteWithAuth } from "../../services/HttpService";
+import "./Post.scss";
+
+function Post({ title, text, userName, userId, postId, likes }) {
+  const [expanded, setExpanded] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeId, setLikeId] = useState(null);
+  const [likeCount, setLikeCount] = useState(likes.length);
+  const [commentList, setCommentList] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const isInitialMount = useRef(true);
+
+  const disabled = !localStorage.getItem("currentUser");
+
+  // Kullanıcının mevcut like durumunu kontrol et
+  const checkLikes = () => {
+    const existingLike = likes.find(
+      l => "" + l.userId === localStorage.getItem("currentUser")
+    );
+    if (existingLike) {
+      setLikeId(existingLike.id);
+      setIsLiked(true);
+    }
+  };
+
+  // Like ekleme
+  const saveLike = () => {
+    PostWithAuth(`/likes`, {
+      postId,
+      userId: localStorage.getItem("currentUser")
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.id) setLikeId(data.id);  // likeId backend’den geliyor
+        setIsLiked(true);
+        setLikeCount(prev => prev + 1);
+      })
+      .catch(err => console.log("error", err));
+  };
+
+  // Like silme
+  const deleteLike = () => {
+    if (!likeId) return;
+    DeleteWithAuth(`/likes/${likeId}`)
+      .then(() => {
+        setIsLiked(false);
+        setLikeId(null);
+        setLikeCount(prev => prev - 1);
+      })
+      .catch(err => console.log("error", err));
+  };
+
+  const handleLike = () => {
+    if (!isLiked) saveLike();
+    else deleteLike();
+  };
+
+  const refreshComments = () => {
+    fetch(`/comments?postId=${postId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": localStorage.getItem("tokenKey")
+      }
+    })
+      .then(res => res.json())
+      .then(
+        result => {
+          setCommentList(result);
+          setIsLoaded(true);
+          setRefresh(false);
+        },
+        err => {
+          console.log("error", err);
+          setError(err);
+          setIsLoaded(true);
+          setRefresh(false);
+        }
+      );
+  };
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+    refreshComments();
+  };
+
+  const setCommentRefresh = () => setRefresh(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      refreshComments();
+    }
+  }, [refresh]);
+
+  useEffect(() => {
+    checkLikes();
+  }, [likes]);
+
+  return (
+    <div className="postContainer">
+      <Card sx={{ width: { xs: "90vw", sm: "500px", md: "700px", lg: "800px" }, margin: "20px", boxShadow: 3, borderRadius: 3, textAlign: "left" }}>
+        <CardHeader
+          avatar={
+            <Link to={`/users/${userId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              <Avatar sx={{ bgcolor: blue[500] }}>{userName?.charAt(0).toUpperCase() || "?"}</Avatar>
+            </Link>
+          }
+          action={<IconButton aria-label="settings"><MoreVertIcon /></IconButton>}
+          title={<Typography sx={{ fontSize: "24px", fontWeight: "bold" }}>{title}</Typography>}
+          subheader="September 14, 2016"
+        />
+        <CardContent sx={{ textAlign: "center", fontSize: "16px" }}>
+          <Typography variant="body2" color="text.secondary">{text}</Typography>
+        </CardContent>
+
+        <CardActions disableSpacing>
+          <IconButton onClick={handleLike} disabled={disabled} aria-label="like">
+            <FavoriteIcon sx={{ color: isLiked ? "red" : null }} />
+          </IconButton>
+          <Typography sx={{ marginLeft: 1 }}>{likeCount}</Typography>
+          <IconButton aria-label="share"><ShareIcon /></IconButton>
+          <IconButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="comments" sx={{ marginLeft: "auto" }}>
+            <CommentIcon sx={{ color: expanded ? blue[500] : null }} />
+          </IconButton>
+        </CardActions>
+
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <Container fixed>
+            {error ? "Error loading comments." :
+              isLoaded ?
+                commentList.length > 0 ?
+                  commentList.map(comment => <Comment key={comment.id} {...comment} />) :
+                  <Typography sx={{ color: "gray", fontStyle: "italic" }}>No comments yet.</Typography>
+                : "Loading..."
+            }
+            {!disabled && <CommentForm userId={localStorage.getItem("currentUser")} userName={localStorage.getItem("userName")} postId={postId} setCommentRefresh={setCommentRefresh} />}
+          </Container>
+        </Collapse>
+      </Card>
+    </div>
+  );
+}
+
+export default Post;
+
+
+/*
 import React, { use, useReducer, useState, useRef, useEffect } from "react";
 import {
   Card,
@@ -87,8 +259,8 @@ function Post({ title, text, userName, userId, postId, likes }) {
 
     const saveLike = () => {
       PostWithAuth(`/likes`, {
-        postId: postId,
-            userId: localStorage.getItem("currentUser"),
+          postId: postId,
+          userId: localStorage.getItem("currentUser"),
       })
      .then((res) => res.json())
      .catch((err) => console.log("error", err))
@@ -117,7 +289,9 @@ function Post({ title, text, userName, userId, postId, likes }) {
     }
   }, [refresh]);
 
-  useEffect(() => { checkLikes(); }, []);
+  useEffect(() => { 
+    checkLikes(); 
+  }, [likes]);
 
 
   return (
@@ -240,3 +414,4 @@ function Post({ title, text, userName, userId, postId, likes }) {
 }
 export default Post;
 // Note: The Post component is designed to display a post with a title and text
+*/
