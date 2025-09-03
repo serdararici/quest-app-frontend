@@ -21,6 +21,8 @@ import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
 import { PostWithAuth, DeleteWithAuth } from "../../services/HttpService";
 import "./Post.scss";
+import { callWithAuth } from "../../utils/auth";
+import { GetWithAuth } from "../../services/HttpService";
 
 function Post({ title, text, userName, userId, postId, likes }) {
   const [expanded, setExpanded] = useState(false);
@@ -31,6 +33,7 @@ function Post({ title, text, userName, userId, postId, likes }) {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
   const isInitialMount = useRef(true);
 
   const disabled = !localStorage.getItem("currentUser");
@@ -46,60 +49,85 @@ function Post({ title, text, userName, userId, postId, likes }) {
     }
   };
 
+
   // Like ekleme
-  const saveLike = () => {
-    PostWithAuth(`/likes`, {
-      postId,
-      userId: localStorage.getItem("currentUser")
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data?.id) setLikeId(data.id);  // likeId backend’den geliyor
-        setIsLiked(true);
-        setLikeCount(prev => prev + 1);
-      })
-      .catch(err => console.log("error", err));
+  const saveLike = async () => {
+    const response = await callWithAuth(PostWithAuth, {
+       url: "/likes",
+        body: {
+           postId,
+            userId: localStorage.getItem("currentUser") 
+        }
+      });
+    if (response.success && response.data?.id) {
+      setLikeId(response.data.id);
+      setIsLiked(true);
+      setLikeCount(prev => prev + 1);
+      return true;
+    } else if (response.error) {
+      console.error("error saving like", response.error);
+      return false;
+    }
   };
+
 
   // Like silme
-  const deleteLike = () => {
-    if (!likeId) return;
-    DeleteWithAuth(`/likes/${likeId}`)
-      .then(() => {
-        setIsLiked(false);
-        setLikeId(null);
-        setLikeCount(prev => prev - 1);
-      })
-      .catch(err => console.log("error", err));
+  const deleteLike = async () => {
+    if (!likeId) return false;
+
+    const response = await callWithAuth(DeleteWithAuth, { url: `/likes/${likeId}` });
+    if (response.success) {
+      setIsLiked(false);
+      setLikeId(null);
+      setLikeCount(prev => prev - 1);
+      return true;
+    } else if (response.error) {
+      console.log("error deleting like", response.error);
+      return false;
+    }
   };
 
-  const handleLike = () => {
-    if (!isLiked) saveLike();
-    else deleteLike();
-  };
+  const handleLike = async () => {
+    if (likeLoading || disabled) return;
 
-  const refreshComments = () => {
-    fetch(`/comments?postId=${postId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("tokenKey")
+    setLikeLoading(true);
+    
+    try {
+      if (!isLiked) {
+        await saveLike();
+      } else {
+        await deleteLike();
       }
-    })
-      .then(res => res.json())
-      .then(
-        result => {
-          setCommentList(result);
-          setIsLoaded(true);
-          setRefresh(false);
-        },
-        err => {
-          console.log("error", err);
-          setError(err);
-          setIsLoaded(true);
-          setRefresh(false);
-        }
-      );
+    } catch (error) {
+      console.error("Like işlemi hatası:", error);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
+  const refreshComments = async () => {
+    try {
+      const response = await callWithAuth(GetWithAuth, { 
+        url: `/comments?postId=${postId}` 
+      });
+      
+      if (response.success) {
+        setCommentList(response.data || []);
+        setIsLoaded(true);
+        setRefresh(false);
+        setError(null);
+      } else {
+        console.error("Yorumlar yüklenemedi:", response.error);
+        setError(response.error);
+        setIsLoaded(true);
+        setRefresh(false);
+      }
+    } catch (error) {
+      console.error("refreshComments hatası:", error);
+      setError(error);
+      setIsLoaded(true);
+      setRefresh(false);
+    }
   };
 
   const handleExpandClick = () => {
