@@ -22,35 +22,41 @@ import Alert from '@mui/material/Alert';
 import { Link } from 'react-router-dom';
 import "./Post.scss";
 import { PostWithAuth } from "../../services/HttpService";
+import { callWithAuth } from "../../utils/auth";
 
 function PostForm({userName, userId, refreshPosts }) {
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
     const [isSent, setIsSent] = useState(false);
 
-  const savePost = async () => {
-    try {
-      const res = await PostWithAuth("/posts", {
-        title: title,
-        userId: userId,
-        text: text,
-      });
-      const data = await res.json();
-      console.log(data);
-      refreshPosts();
-    } catch (err) {
-      console.log("error", err);
-    }
-  };
-
-
-  const handleSubmit = () => {
-    savePost();
-    setIsSent(true);
-    setTitle("");
-    setText("");
-    refreshPosts();
-  }
+    const savePost = async () => {
+      try {
+        const response = await callWithAuth(PostWithAuth, {
+          url: "/posts",
+          body: {
+            title,
+            userId,
+            text,
+          },
+        });
+  
+        if (response.success) {
+          console.log("Post created:", response.data);
+          refreshPosts();
+          setIsSent(true);
+          setTitle("");
+          setText("");
+        } else {
+          console.error("Error creating post:", response.error);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+  
+    const handleSubmit = () => {
+      savePost();
+    };
 
   const handleTitle = (value) => {
     setTitle(value);

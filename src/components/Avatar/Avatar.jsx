@@ -14,6 +14,7 @@ import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import Radio from '@mui/material/Radio';
 import ListItemText from '@mui/material/ListItemText';
 import { PutWithAuth } from "../../services/HttpService";
+import { callWithAuth } from "../../utils/auth";
 
 const style = {
   position: 'absolute', 
@@ -25,19 +26,21 @@ function Avatar(props) {
     const [open, setOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState(avatarId || 0); // Default to avatar 1 if not provided
 
-    const saveAvatar = () => {
-        PutWithAuth(`/users/${localStorage.getItem("currentUser")}/avatar`), {
-            avatar: selectedValue
+    const saveAvatar = async () => {
+        try {
+          const response = await callWithAuth(PutWithAuth, {
+            url: `/users/${localStorage.getItem("currentUser")}/avatar`,
+            body: { avatar: selectedValue }
+          });
+          if (response.success) {
+            console.log("Avatar updated:", response.data);
+          } else {
+            console.error("Error updating avatar:", response.error);
+          }
+        } catch (err) {
+          console.error("Error saving avatar:", err);
         }
-        .then(res => res.json())
-        .then(data => {
-            console.log("Avatar updated:", data);
-        })
-        .catch(err => {
-            console.log("Error saving avatar:", err);
-        });
-
-    }
+    };
 
     const handleChange = (event) => {
         setSelectedValue(event.target.value);  

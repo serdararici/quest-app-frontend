@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
 import Post from "../Post/Post";
 import { GetWithAuth } from "../../services/HttpService";
+import { callWithAuth } from "../../utils/auth";
 
 const columns = [
     {
@@ -35,31 +36,23 @@ function PopUp(props) {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const getPost = () => {
+    const getPost = async () => {
         if (!postId) return;
-        
+    
         setLoading(true);
-        const token = localStorage.getItem("tokenKey");
-        
-        GetWithAuth(`/posts/${postId}`)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error("HTTP error! status: " + res.status);
-            }
-            return res.json();
-        })
-        .then(
-            (result) => {
-                console.log("PopUp: Post data received:", result);
-                setPost(result);
-                setLoading(false);
-            },
-            (error) => {
-                console.log("Error fetching post:", error);
-                setLoading(false);
-            }
-        );
-    }
+        try {
+          const response = await callWithAuth(GetWithAuth, { url: `/posts/${postId}` });
+          if (response.success) {
+            setPost(response.data);
+          } else if (response.error) {
+            console.log("Error fetching post:", response.error);
+          }
+        } catch (err) {
+          console.log("Error fetching post:", err);
+        } finally {
+          setLoading(false);
+        }
+    };
 
     const handleClose = () => {
       setOpen(false);
@@ -131,40 +124,26 @@ function UserActivity(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const getActivity = () => {
+
+    const getActivity = async () => {
         if (!userId) return;
-        
-        console.log("Fetching user activity for userId:", userId);
-        const token = localStorage.getItem("tokenKey");
-        console.log("Token from localStorage:", token);
-        
-        fetch("/users/activity/" + userId, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token,
-            }
-        })
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error("HTTP error! status: " + res.status);
-            }
-            return res.json();
-        })
-        .then(
-            (result) => {
-                console.log("Activity result:", result);
-                setIsLoaded(true);
-                setRows(result);
+    
+        try {
+            const response = await callWithAuth(GetWithAuth, { url: "/users/activity/" + userId });
+            if (response.success && response.data) {
+                setRows(response.data);
                 setError(null);
-            },
-            (error) => {
-                console.log("Error getting activity:", error);
-                setIsLoaded(true);
-                setError(error);
+            } else if (response.error) {
+                setError(response.error);
             }
-        );
-    }
+        } catch (err) {
+            console.log("Error getting activity:", err);
+            setError(err);
+        } finally {
+            setIsLoaded(true);
+        }
+    };
+    
 
     useEffect(() => {
         if (userId) {

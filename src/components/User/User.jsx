@@ -4,27 +4,26 @@ import "./User.scss";
 import Avatar from "../Avatar/Avatar";
 import UserActivity from "../UserActivity/UserActivity";
 import { GetWithAuth } from "../../services/HttpService";
+import { callWithAuth } from "../../utils/auth";
 
 function User() {
     const { userId } = useParams();
     const [user, setUser] = useState();
 
-    const getUser = () => {
-        GetWithAuth(`/users/${userId}`)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error("HTTP error! status: " + res.status);
+
+    const getUser = async () => {
+        try {
+            const response = await callWithAuth(GetWithAuth, { url: `/users/${userId}` });
+            if (response.success && response.data) {
+                setUser(response.data);
+                console.log("User data:", response.data);
+            } else if (response.error) {
+                console.error("Error getting user:", response.error);
             }
-            return res.json();
-        })
-        .then((data) => {
-            console.log("User data:", data);
-            setUser(data);
-        })
-        .catch((error) => {
-            console.log("Error getting user:", error);
-        });
-    }
+        } catch (err) {
+            console.error("Exception getting user:", err);
+        }
+    };
 
     useEffect(() => {
         if (userId) {

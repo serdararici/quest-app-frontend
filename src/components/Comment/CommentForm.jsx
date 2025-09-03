@@ -29,55 +29,6 @@ function CommentForm({ userId, userName, postId, setCommentRefresh }) {
     }
   };
 
-  /*
-  const saveComment = async (isRetry = false) => {
-    try {
-      console.log("Yorum gönderiliyor...", { postId, userId, text });
-      
-      const res = await PostWithAuth("/comments", {
-        postId,
-        userId,
-        text,
-      });
-
-      console.log("API yanıtı:", res.status, res.ok);
-
-      if (!res.ok) {
-        // Eğer bu zaten bir retry ise, logout yap
-        if (isRetry) {
-          console.log("Retry başarısız, logout yapılıyor");
-          logout();
-          return { success: false, error: "Token yenileme başarısız" };
-        }
-
-        console.log("Token yenileniyor...");
-        // Token süresi dolmuş olabilir
-        const refreshRes = await RefreshToken();
-        
-        if (!refreshRes.ok) {
-          console.log("RefreshToken başarısız:", refreshRes.status);
-          logout();
-          return { success: false, error: "Refresh token geçersiz" };
-        }
-
-        const tokens = await refreshRes.json();
-        console.log("Yeni token alındı");
-        localStorage.setItem("tokenKey", tokens.accessToken);
-        
-        // Yeniden dene (isRetry = true ile)
-        return await saveComment(true);
-      }
-
-      const data = await res.json();
-      console.log("Yorum başarıyla kaydedildi:", data);
-      return { success: true, data };
-      
-    } catch (err) {
-      console.error("Yorum kaydedilirken hata:", err);
-      return { success: false, error: err };
-    }
-  };
-  */
 
   const handleSubmit = async () => {
     if (!text.trim() || loading) {
