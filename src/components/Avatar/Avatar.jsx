@@ -13,6 +13,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import Radio from '@mui/material/Radio';
 import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
 import { PutWithAuth } from "../../services/HttpService";
 import { callWithAuth } from "../../utils/auth";
 
@@ -30,7 +31,7 @@ function Avatar(props) {
         try {
           const response = await callWithAuth(PutWithAuth, {
             url: `/users/${localStorage.getItem("currentUser")}/avatar`,
-            body: { avatar: selectedValue }
+            body: { avatarId: Number(selectedValue) }
           });
           if (response.success) {
             console.log("Avatar updated:", response.data);
@@ -40,11 +41,12 @@ function Avatar(props) {
         } catch (err) {
           console.error("Error saving avatar:", err);
         }
-    };
+      };            
 
-    const handleChange = (event) => {
-        setSelectedValue(event.target.value);  
-    }
+      const handleChange = (event) => {
+        setSelectedValue(Number(event.target.value));  
+      };
+      
 
     const handleOpen = () => {
         setOpen(true);  
@@ -117,7 +119,7 @@ function Avatar(props) {
                     {[1, 2, 3, 4, 5, 6].map((key) => {
                         const labelId = `checkbox-list-secondary-label-${key}`;
                         return (
-                        <ListItem key={key} button>
+                        <ListItemButton key={key} onClick={() => setSelectedValue(key)}>
                             <CardMedia
                             component="img"
                             alt={`Avatar n°${key}`}
@@ -140,7 +142,7 @@ function Avatar(props) {
                                 inputProps={{ 'aria-labelledby': labelId }}
                             />
                             </ListItemSecondaryAction>
-                        </ListItem>
+                        </ListItemButton>
                         );
                     })}
                     </List>
