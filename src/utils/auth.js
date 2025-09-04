@@ -1,12 +1,14 @@
 
 import { RefreshToken } from "../services/HttpService";
 
-export const logout = () => {
+  export const logout = () => {
     localStorage.removeItem("tokenKey");
     localStorage.removeItem("currentUser");
     localStorage.removeItem("refreshKey");
     localStorage.removeItem("userName");
-    window.location.href = '/auth'; // Sayfayı yenilemek için
+    if (window.location.pathname !== '/auth') {
+        window.location.href = '/auth';
+    }
   };
 
   export async function callWithAuth(apiFunc, payload, isRetry = false) {

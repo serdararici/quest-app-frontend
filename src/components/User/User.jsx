@@ -5,10 +5,13 @@ import Avatar from "../Avatar/Avatar";
 import UserActivity from "../UserActivity/UserActivity";
 import { GetWithAuth } from "../../services/HttpService";
 import { callWithAuth } from "../../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 function User() {
     const { userId } = useParams();
     const [user, setUser] = useState();
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
 
     const getUser = async () => {
@@ -19,18 +22,42 @@ function User() {
                 console.log("User data:", response.data);
             } else if (response.error) {
                 console.error("Error getting user:", response.error);
+                if (response.error.includes("Token") || response.error.includes("401")) {
+                    navigate('/auth');
+                }
             }
         } catch (err) {
             console.error("Exception getting user:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
+        // Token kontrolü yap
+        const token = localStorage.getItem("tokenKey");
+        const currentUser = localStorage.getItem("currentUser");
+        
+        if (!token || !currentUser) {
+            console.log("Token bulunamadı, login'e yönlendiriliyor");
+            navigate('/auth');
+            return;
+        }
+
         if (userId) {
             getUser();
         }
-    }, [userId]);
+    }, [userId, navigate]);
 
+    if (loading) {
+        return (
+            <div className="user">
+                <div style={{textAlign: 'center', padding: '50px'}}>
+                    Yükleniyor...
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="user">
             {user && (
